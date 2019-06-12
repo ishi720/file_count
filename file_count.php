@@ -65,14 +65,22 @@ function ignore_check($path){
     $path = preg_replace('/^\.\//','', $path);
     $is_ignore = false;
 
-    foreach($ignore_array as $k => $v) {
+    foreach($ignore_array as $v) {
         $pattern = preg_replace('/^\//','', $v);
         if ( preg_match('/\/$/', $pattern)){
             $pattern = $pattern."*";
         }
         if ( fnmatch($pattern, $path)){
             $is_ignore = true;
-            break;
+        }
+
+        // ignoreの条件に!が付いていた場合の処理
+        if ( preg_match('/^!/', $v) && $is_ignore) {
+            $pattern2 = preg_replace('/^!/', '', $v);
+            if ( fnmatch($pattern2, $path) ) {
+                $is_ignore = false;
+                break;
+            }
         }
     }
     if ( $is_ignore ) {
